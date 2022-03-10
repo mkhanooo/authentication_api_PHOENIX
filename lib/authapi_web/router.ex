@@ -5,10 +5,22 @@ defmodule AuthapiWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", AuthapiWeb do
-    pipe_through :api
+  pipeline :auth do
+     plug Authapi.Gaurdian.AuthPipeline
   end
 
+
+  scope "/api", AuthapiWeb do
+    pipe_through :api
+    post "/users", UserController, :register
+    post "/session/new", SessionController, :new
+  end
+
+  scope "/api", AuthapiWeb do
+    pipe_through [:api, :auth]
+    post "/session/refresh", SessionController, :refresh
+    post "/session/delete", SessionController, :delete
+  end
   # Enables LiveDashboard only for development
   #
   # If you want to use the LiveDashboard in production, you should put
